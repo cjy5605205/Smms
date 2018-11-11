@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/member_add.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header height="100px">
+            <h2>欢迎你 admin</h2>
+            <p>查看和管理所有已有商品</p>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>商品管理</span>
+                </div>
+
+                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                    <el-form-item label="分类">
+                        <el-select v-model="formInline.productClassify" placeholder="--选择商品分类--">
+                            <el-option label="区域一" value="shanghai"></el-option>
+                            <el-option label="区域二" value="beijing"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="关键字">
+                        <el-input v-model="formInline.keywords" placeholder="请输入关键字"></el-input>
+                        (商品名称，条形码)
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button type="success" size="mini" @click="onSubmit">查询</el-button>
+                    </el-form-item>
+                </el-form>
+
+
+                <template>
+                    <el-table :data="tableData" style="width: 100%">
+                        <el-table-column label="商品条形码" width="150">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.date }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="商品名称">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.name }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="所属分组">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.address }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="售价（元）">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.price }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="促销价（元）">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.promotion }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="市场价（元）">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.marketPrice }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="库存">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.count }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="库存总额（元）">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.sumCount }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="销售总额（元）">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.sumPrice }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="管理" width="150">
+                            <template slot-scope="scope">
+                                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                                <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </template>
+
+                <div class="block mt30">
+                    <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPage4"
+                            :page-sizes="[100, 200, 300, 400]"
+                            :page-size="100"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="400">
+                    </el-pagination>
+                </div>
+            </el-card>
+        </el-main>
+
+        <el-footer height="61px">
+            <p>&copy;Copyright2018 华联超市管理系统</p>
+        </el-footer>
+    </el-container>
+</div>
+
+<!-- 引入jQuery -->
+<script src="./js/jquery.min.js"></script>
+<!-- 引入vue -->
+<script src="js/vue.js"></script>
+<!-- 引入elementUI -->
+<script src="./js/elementUI.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                formInline: {
+                    keywords: '',
+                    productClassify: ''
+                },
+                tableData: [{
+                    date: '7896541258',
+                    name: '薯片',
+                    address: '可口可怜',
+                    price: '5.00',
+                    promotion: '未促销',
+                    marketPrice: '6.00',
+                    count: 100,
+                    sumCount: 9000.00,
+                    sumPrice: 8000.00
+                }, {
+                    date: '7896541258',
+                    name: '可口可乐',
+                    address: '可口可怜',
+                    price: '5.00',
+                    promotion: '未促销',
+                    marketPrice: '6.00',
+                    count: 100,
+                    sumCount: 9000.00,
+                    sumPrice: 8000.00
+                }, {
+                    date: '7896541258',
+                    name: '百事可怜',
+                    address: '可口可怜',
+                    price: '5.00',
+                    promotion: '未促销',
+                    marketPrice: '6.00',
+                    count: 100,
+                    sumCount: 9000.00,
+                    sumPrice: 8000.00
+                }, {
+                    date: '7896541258',
+                    name: '非常可怜',
+                    address: '可口可怜',
+                    price: '5.00',
+                    promotion: '未促销',
+                    marketPrice: '6.00',
+                    count: 100,
+                    sumCount: 9000.00,
+                    sumPrice: 8000.00
+                }],
+                currentPage1: 5,
+                currentPage2: 5,
+                currentPage3: 5,
+                currentPage4: 4
+            }
+
+        },
+        methods: {
+            handleEdit(index, row) {
+                console.log(index, row);
+            },
+            handleDelete(index, row) {
+                console.log(index, row);
+            },
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+            },
+            onSubmit() {
+                console.log('submit!');
+            }
+        }
+    });
+</script>
+</body>
+</html>

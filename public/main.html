@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header height="100px">
+            <h2>欢迎你 admin</h2>
+            <p>查看详细的系统信息</p>
+        </el-header>
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>系统信息</span>
+                </div>
+                <div class="text item">
+                    <!-- 消息框 -->
+                    <el-alert title="成功提示的文案" type="success" show-icon>
+                    </el-alert>
+                    <el-alert id="importAlert" title="不可关闭的 alert" type="info" :closable="false">
+                    </el-alert>
+                    <!-- 左右结构 -->
+                    <el-row :gutter="22">
+                        <el-col :span="12">
+                            <div class="grid-content bg-purple">
+                                <el-card class="box-card">
+                                    <div slot="header" class="clearfix">
+                                        <span>销售排行</span>
+                                    </div>
+                                    <div class="text item">
+                                        <template>
+                                            <el-table :data="tableData" stripe style="width: 100%">
+                                                <el-table-column prop="date" label="日期" width="180">
+                                                </el-table-column>
+                                                <el-table-column prop="name" label="姓名" width="180">
+                                                </el-table-column>
+                                                <el-table-column prop="address" label="地址">
+                                                </el-table-column>
+                                            </el-table>
+                                        </template>
+                                    </div>
+                                </el-card>
+                            </div>
+                        </el-col>
+
+                        <el-col :span="12">
+                            <div class="grid-content bg-purple-light">
+                                <el-card class="box-card">
+                                    <div slot="header" class="clearfix">
+                                        <span>缺货商品</span>
+                                    </div>
+                                    <div class="text item">
+                                        <template>
+                                            <el-table :data="tableData" stripe style="width: 100%">
+                                                <el-table-column prop="date" label="日期" width="180">
+                                                </el-table-column>
+                                                <el-table-column prop="name" label="姓名" width="180">
+                                                </el-table-column>
+                                                <el-table-column prop="address" label="地址">
+                                                </el-table-column>
+                                            </el-table>
+                                        </template>
+                                    </div>
+                                </el-card>
+                            </div>
+                        </el-col>
+                    </el-row>
+                </div>
+            </el-card>
+        </el-main>
+        <el-footer height="61px">
+            <p>&copy;Copyright2018 华联超市管理系统</p>
+        </el-footer>
+    </el-container>
+</div>
+
+<!-- 引入jQuery -->
+<script src="./js/jquery.min.js"></script>
+<!-- 引入vue -->
+<script src="js/vue.js"></script>
+<!-- 引入elementUI -->
+<script src="./js/elementUI.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                tableData: [{
+                    date: '2016-05-02',
+                    name: '王小虎'
+                }, {
+                    date: '2016-05-04',
+                    name: '王小虎'
+                }, {
+                    date: '2016-05-01',
+                    name: '王小虎'
+                }, {
+                    date: '2016-05-03',
+                    name: '王小虎'
+                }, {
+                    date: '2016-05-03',
+                    name: '王小虎'
+                }, {
+                    date: '2016-05-03',
+                    name: '王小虎'
+                }]
+            }
+        }
+    });
+</script>
+</body>
+</html>

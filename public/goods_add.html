@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/member_add.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header height="100px">
+            <h2>欢迎你 admin</h2>
+            <p>1.你可以在这里添加新的商品或者编辑已有的商品。2.新添加商品的时候可以同时进行入库(入库必须有数量和进价)! 3.带<span class="cRed">*</span>的项目必填</p>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>添加管理员账号</span>
+                </div>
+                <el-form  :label-position="labelPosition" :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="所属分类" prop="region">
+                        <el-select v-model="ruleForm2.region" placeholder="-----选择分类-----">
+                            <el-option label="零食" value="零食"></el-option>
+                            <el-option label="肉类" value="肉类"></el-option>
+                            <el-option label="海鲜" value="海鲜"></el-option>
+                            <el-option label="蔬菜" value="蔬菜"></el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="商品条形码" prop="barCode">
+                        <el-input v-model="ruleForm2.barCode"></el-input>&emsp;<el-button type="success" @click="getBarCode()">获取条形码</el-button>
+                    </el-form-item>
+
+                    <el-form-item label="商品名称" prop="goodsName">
+                        <el-input v-model="ruleForm2.goodsName"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="商品售价" prop="goodsPrice">
+                        <el-input v-model.number="ruleForm2.goodsPrice" ></el-input>元
+                    </el-form-item>
+
+                    <el-form-item label="市场价" prop="marketPrice">
+                        <el-input v-model.number="marketPrice" :disabled="true"></el-input>元
+                        <p class="cCCC">默认市场价为售价的1.2倍</p>
+                    </el-form-item>
+
+                    <el-form-item label="进价" prop="purchasePrice">
+                        <el-input v-model.number="ruleForm2.purchasePrice"></el-input>元
+                    </el-form-item>
+
+                    <el-form-item label="入库数量" prop="count">
+                        <el-input v-model.number="ruleForm2.count"></el-input>
+                        <p class="cCCC">记重商品单位为千克</p>
+                    </el-form-item>
+
+                    <el-form-item label="商品重量" prop="weight">
+                        <el-input v-model.number="ruleForm2.weight"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="商品单位" prop="unit">
+                        <el-input v-model="ruleForm2.unit"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="会员优惠" prop="isDiscount">
+                        <el-radio-group v-model="ruleForm2.isDiscount">
+                            <el-radio label="享受"></el-radio>
+                            <el-radio label="不享受"></el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+
+                    <el-form-item label="是否促销" prop="isPromotion">
+                        <el-radio-group v-model="ruleForm2.isPromotion">
+                            <el-radio label="启用"></el-radio>
+                            <el-radio label="禁用"></el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+
+                    <el-form-item label="商品简介">
+                        <el-input type="textarea" v-model="ruleForm2.introduce"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
+                        <el-button @click="resetForm('ruleForm2')">重置</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-card>
+        </el-main>
+
+        <el-footer height="61px">
+            <p>&copy;Copyright2018 华联超市管理系统</p>
+        </el-footer>
+    </el-container>
+</div>
+
+<!-- 引入jQuery -->
+<script src="./js/jquery.min.js"></script>
+<!-- 引入vue -->
+<script src="js/vue.js"></script>
+<!-- 引入elementUI -->
+<script src="./js/elementUI.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            let checkNumber = (rule, value, callback) => {
+                    if (!Number.isInteger(value)) {
+                        callback(new Error('请输入数字值'));
+                        return false;
+                    } else {
+                        if (value < 0) {
+                            callback(new Error('请输入大于0的数'));
+                            return false;
+                        } else {
+                            callback();
+                            return false;
+                        }
+                    }
+                };
+            return {
+                labelPosition: 'top',
+                ruleForm2: {
+                    region: "",
+                    barCode: "",
+                    goodsName: "",
+                    goodsPrice: "",
+                    marketPrice: "",
+                    purchasePrice: "",
+                    count: "",
+                    weight: "",
+                    unit: "",
+                    isDiscount: "",
+                    isPromotion: "",
+                    introduce: ""
+                },
+                rules2: {
+                    region: [
+                        { required: true, message: "请选择用户组", trigger: "change"}
+                    ],
+                    barCode: [
+                        { required: true, message: "请获取条形码", trigger: "change"}
+                    ],
+                    goodsName: [
+                        { required: true, message: "请输入商品名字", trigger: "blur"}
+                    ],
+                    goodsPrice: [
+                        { validator: checkNumber, trigger: "change"}
+                    ],
+                    purchasePrice: [
+                        { required: true, message: "请输入进价", trigger: "blur"},
+                        { validator: checkNumber, trigger: "change"}
+                    ],
+                    count: [
+                        { required: true, message: "请输入入库数量", trigger: "blur"},
+                        { validator: checkNumber, trigger: "change"}
+                    ],
+                    weight: [
+                        { required: true, message: "请输入商品重量", trigger: "blur"},
+                        { validator: checkNumber, trigger: "change"}
+                    ],
+                    unit: [
+                        { required: true, message: "请输入商品单位", trigger: "blur"}
+                    ],
+                    isDiscount: [
+                        { required: true, message: "请选择是否优惠", trigger: "change"}
+                    ],
+                    isPromotion: [
+                        { required: true, message: "请选择是否促销", trigger: "change"}
+                    ]
+
+                }
+            };
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        console.log(this.ruleForm2);
+
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            getBarCode(){
+                this.ruleForm2.barCode = Math.floor(Math.random()*(99999 - 10000 + 1)*10000);
+            }
+        },
+        computed: {
+            marketPrice() {
+                this.ruleForm2.marketPrice = this.ruleForm2.goodsPrice * 1.2;
+                return (this.ruleForm2.goodsPrice * 1.2).toFixed(2);
+            }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/member_add.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header height="100px">
+            <h2>欢迎你 admin</h2>
+            <p>查看所有管理员账号</p>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>账号管理</span>
+                </div>
+                <template>
+                    <el-table :data="userData" style="width: 100%">
+                        <el-table-column label="用户ID">
+                            <template slot-scope="scope">
+                                <i><img src="./images/user.png" alt=""></i>
+                                <span style="margin-left: 10px">{{ scope.row.u_id }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="用户名">
+                            <template slot-scope="scope">
+                                <span style="margin-left: 10px">{{ scope.row.userName }}</span>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="用户组">
+                            <template slot-scope="scope">
+                            <span style="margin-left: 10px">{{ scope.row.userGroup }}</span>
+                        </template>
+                        </el-table-column>
+
+                        <el-table-column label="注册时间" prop="createDatetime" :formatter="myDateFormat">
+                           <!-- <template slot-scope="scope">
+                                <span style="margin-left: 10px">{{ scope.row.createDatetime }}</span>
+                            </template>-->
+                        </el-table-column>
+
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button size="mini" @click="handleEdit(scope.row.u_id, scope.row)">编辑</el-button>
+                                <el-button size="mini" type="danger" @click="handleDelete(scope.row.u_id, scope.row)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </template>
+            </el-card>
+        </el-main>
+
+        <el-footer height="61px">
+            <p>&copy;Copyright2018 华联超市管理系统</p>
+        </el-footer>
+    </el-container>
+</div>
+
+<!-- 引入jQuery -->
+<script src="./js/jquery.min.js"></script>
+<!-- 引入vue -->
+<script src="js/vue.js"></script>
+<!-- 引入elementUI -->
+<script src="./js/elementUI.js"></script>
+<!-- 引入momentJS -->
+<script src="./js/moment-with-locales.min.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                userData: []
+            }
+        },
+        methods: {
+            handleEdit(index, row) {
+                // console.log(index, row);
+                location.href = "./member_edit.html?uid="+index;
+            },
+            handleDelete(index, row) {
+                /*if (confirm("是否删除？")){
+                    // console.log(index, row);
+                    $.get("/users/del?uid="+index, (result)=>{
+                        if (result.isOK) {
+                            this.$message({
+                                message: result.msg,
+                                type: 'success'
+                            });
+                            // location.href = "./member_list.html";
+                        }else {
+                            this.$message.error('管理员删除失败！');
+                        }
+                    })
+                }else {
+                    return false;
+                }*/
+                this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    center: true
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                    $.get("/users/del?uid="+index, (result)=>{
+                        if (result.isOK) {
+                            this.getData();
+                        }else {
+                            this.$message.error('管理员删除失败！');
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 获取数据
+            getData() {
+                // 由于下面用的是jquery 里面的this指向的不是vue对象 所以定义一个变量保存vue对象
+                let self = this;
+                $.get("/users/list", function (result) {
+                    // console.log(result);
+                    self.userData = result;
+                })
+            },
+            //格式化时间的方法
+            myDateFormat: function (row, column) {
+                var date = row[column.property];
+                if (date === undefined) {
+                    return "";
+                }
+                return moment(date).format("YYYY-MM-DD");
+                //return moment(date).format("YYYY年MM月DD日");
+            }
+        },
+        // 挂载实例时 发送ajax 请求数据
+        mounted() {
+            this.getData();
+        }
+    });
+</script>
+</body>
+</html>

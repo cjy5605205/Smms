@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/member_add.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header height="100px">
+            <h2>欢迎你 admin</h2>
+            <p>查看和管理所有分类</p>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>分类管理</span>
+                </div>
+                <template>
+                    <el-table :data="tableData" style="width: 100%">
+                        <el-table-column label="分类名称">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{ scope.row.date }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                                <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </template>
+            </el-card>
+        </el-main>
+
+        <el-footer height="61px">
+            <p>&copy;Copyright2018 华联超市管理系统</p>
+        </el-footer>
+    </el-container>
+</div>
+
+<!-- 引入jQuery -->
+<script src="./js/jquery.min.js"></script>
+<!-- 引入vue -->
+<script src="js/vue.js"></script>
+<!-- 引入elementUI -->
+<script src="./js/elementUI.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            return {
+                tableData: [{
+                    date: '日用品'
+                }, {
+                    date: '零食'
+                }, {
+                    date: '玩具'
+                }, {
+                    date: '海鲜'
+                }]
+            }
+        },
+        methods: {
+            handleEdit(index, row) {
+                console.log(index, row);
+            },
+            handleDelete(index, row) {
+                console.log(index, row);
+            }
+        }
+    });
+</script>
+</body>
+</html>

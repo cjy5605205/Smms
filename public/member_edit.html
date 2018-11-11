@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/member_add.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header height="100px">
+            <h2>欢迎你 admin</h2>
+            <p>添加管理员账号</p>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>修改管理员账号</span>
+                </div>
+                <el-form  :label-position="labelPosition" :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+                    <el-form-item label="用户名" prop="username">
+                        <el-input v-model="ruleForm2.username"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="pass">
+                        <el-input type="password" v-model="ruleForm2.pass" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码" prop="checkPass">
+                        <el-input type="password" v-model="ruleForm2.checkPass" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户组" prop="region">
+                        <el-select v-model="ruleForm2.region" placeholder="请选择活动区域">
+                            <el-option label="超级管理员" value="superAdmin"></el-option>
+                            <el-option label="管理员" value="admin"></el-option>
+                            <el-option label="用户" value="user"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-card>
+        </el-main>
+
+        <el-footer height="61px">
+            <p>&copy;Copyright2018 华联超市管理系统</p>
+        </el-footer>
+    </el-container>
+</div>
+
+<!-- 引入jQuery -->
+<script src="./js/jquery.min.js"></script>
+<!-- 引入vue -->
+<script src="js/vue.js"></script>
+<!-- 引入elementUI -->
+<script src="./js/elementUI.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            var validatePass2 = (rule, value, callback) => {
+                if (value !== this.ruleForm2.pass) {
+                    callback(new Error('两次输入密码不一致!'));
+                } else {
+                    callback();
+                }
+            };
+            return {
+                labelPosition: 'top',
+                ruleForm2: {
+                    pass: '',
+                    checkPass: '',
+                    OldPass: '',
+                    username: '',
+                    region: '',
+                    uid: -1
+                },
+                rules2: {
+                    pass: [
+                        { required: true, message: "请输入密码", trigger: 'blur' },
+                        { min: 6, max: 32, message: "密码必须在6~12位之间", trigger: 'blur'}
+                    ],
+                    checkPass: [
+                        { required: true, message: "请输入密码", trigger: 'blur' },
+                        { min: 6, max: 32, message: "密码必须在6~12位之间", trigger: 'blur'},
+                        { validator: validatePass2, trigger: 'change' }
+                    ],
+                    username: [
+                        { required: true, message: "请输入用户名", trigger: 'blur' },
+                        { min: 6, max: 18, message: "用户名必须在6~18位之间", trigger: 'blur'}
+                    ],
+                    region: [
+                        { required: true, message: "请选择用户组", trigger: "change"}
+                    ]
+                }
+            };
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        // console.log(this.ruleForm2);
+                        // 发送ajax请求
+                        $.post("./users/save", this.ruleForm2, (result)=>{
+                            // console.log(result);
+                            if (result.isOK) {
+                                this.$refs[formName].resetFields();
+                                location.href = "./member_list.html";
+                            }else {
+                                this.$message.error('管理员修改失败！');
+                            }
+                        })
+
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            }
+        },
+        mounted() {
+            let reqUrl = location.href;
+            let uid = reqUrl.split("=")[1];
+
+            $.get("/users/edit", {uid}, (result)=>{
+                // console.log(result);
+
+                this.ruleForm2.username = result[0].userName;
+                this.ruleForm2.pass = result[0].userPwd;
+                this.ruleForm2.checkPass = result[0].userPwd;
+                this.ruleForm2.region = result[0].userGroup;
+                this.ruleForm2.OldPass = result[0].userPwd;  // 保存旧密码 用于判断是否进行过加密
+                this.ruleForm2.uid= result[0].u_id;  // 保存ID用于保存时 查找到对应的数据
+            })
+        }
+    });
+</script>
+</body>
+</html>

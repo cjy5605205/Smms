@@ -1,0 +1,18 @@
+.el-input {
+    width: 30%;
+}
+
+.el-input--suffix {
+    width: 100%;
+}
+
+.el-textarea {
+    width: 30%;
+}
+
+.el-main .el-card__header{
+    color: #6a749a;
+    font-size: 20px;
+    font-weight: bold;
+    background-image: linear-gradient(to right, #74ebd5 0%, #9face6 100%);
+}

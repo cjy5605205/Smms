@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/elementUI.css">
+    <link rel="stylesheet" href="./css/signIn.css">
+</head>
+<body>
+    <div id="app">
+        <div id="box">
+            <h1  align="center">管理员登录</h1>
+            <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+                <el-form-item label="账号" prop="username">
+                    <el-input id="username" type="username" v-model="ruleForm2.username" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="password">
+                    <el-input id="password" type="password" v-model="ruleForm2.password" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button  class="circle01" @click="submitForm('ruleForm2')">
+                        <div class="nike">登录</div>
+                        <div class="circle02"></div>
+                    </el-button>
+                    <el-button id="reset"  @click="resetForm('ruleForm2')">重置</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
+
+
+    <!-- 引入jQuery -->
+    <script src="./js/jquery.min.js"></script>
+    <!-- 引入vue -->
+    <script src="js/vue.js"></script>
+    <!-- 引入elementUI -->
+    <script src="./js/elementUI.js"></script>
+    <script src="./js/signIn.js"></script>
+    <script>
+        new Vue({
+            el: "#app",
+            data() {
+                return {
+                    ruleForm2: {
+                        username: '',
+                        password: ''
+                    },
+                    rules2: {
+                        username: [
+                            { required: true, message: '请输入账号', trigger: 'change' },
+                        ],
+                        password: [
+                            { required: true, message: '请输入密码', trigger: 'change' }
+                        ]
+                    }
+                };
+            },
+            methods: {
+                submitForm(formName) {
+                    this.$refs[formName].validate((valid) => {
+                        if (valid) {
+                            // console.log(this.ruleForm2);
+                            // 发送ajax查询账号是否存在
+                            $.post("/users/login", this.ruleForm2, (result)=>{
+                                // console.log(result);
+                                if (result.length > 0) {
+                                    location.href = "./index.html";
+                                }else {
+                                    this.$message.error('用户名或密码错误！');
+                                    $("#password").val("");
+                                }
+                            });
+
+                        } else {
+                            console.log('error submit!!');
+                            return false;
+                        }
+                    });
+                },
+                resetForm(formName) {
+                    this.$refs[formName].resetFields();
+                }
+            }
+        })
+    </script>
+</body>
+</html>
