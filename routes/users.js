@@ -1,21 +1,9 @@
 var express = require('express');
 var router = express.Router();
 
-// 1.引入mysql模块 （先安装模块 npm i mysql）
-let mysql = require('mysql');
+let connection = require("./mysqlConn");
 // 引入md5加密模块
 let md5 = require('crypto');
-
-// 2.链接数据库
-let connection = mysql.createConnection({
-    host: "localhost",  // 主机名
-    user: "root",       // 用户名
-    password: "root",  // 密码
-    database: "db_smms"// 数据库名
-});
-
-// 3.打开数据库
-connection.connect();
 
 // 登录验证
 router.post("/login", function (req, res) {
@@ -28,12 +16,41 @@ router.post("/login", function (req, res) {
     let sqlStr = `select * from tb_user where userName='${username}' and userPwd='${password}'`;
     connection.query(sqlStr, function (err, result) {
         if (err) throw err;
-        res.send(result);
-    })
+        if (result.length>0) {
+            // 把用户名和用户ID写入cookie
+            res.cookie("username", result[0].userName);
+            res.cookie("u_id", result[0].u_id);
 
+            res.send({"isOK": true, msg: "登录成功！"});
+        }else {
+            res.send({"isOK": false, msg: "登录失败！"});
+        }
+    })
 });
 
-/* 添加管理员 */
+// 判断cookie是否存在 阻止未登录的用户访问功能页面
+router.get('/checkState', function (req, res) {
+    // 读取cookie中的username
+    let username = req.cookies.username;
+
+    // 如果username不存在 则跳转到登录页面
+    if (!username) {
+        res.send("alert('非法入侵，请登录！');location.href='signIn.html'");
+    }else {
+        res.send("");
+    }
+});
+
+// 退出登录
+router.get('/signOut', function (req, res) {
+    /*console.log(req.cookies.username);
+    console.log(req.cookies.u_id);*/
+    res.clearCookie("username");
+    res.clearCookie("u_id");
+    res.redirect("/signIn.html");
+});
+
+// 添加管理员
 router.post('/add', function(req, res, next) {
     let {username, pass, region} = req.body;
     pass=md5.createHash("md5").update(pass).digest("hex");

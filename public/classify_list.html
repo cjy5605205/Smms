@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="./css/elementUI.css">
     <link rel="stylesheet" href="./css/member_add.css">
     <link rel="stylesheet" href="./css/index.css">
+    <!-- 如果不用script标签进行同步请求 而是使用异步 则用户会看到网页内容后再被阻止请求 -->
+    <script src="/users/checkState"></script>
 </head>
 <body>
 <div id="app">
@@ -22,17 +24,18 @@
                     <span>分类管理</span>
                 </div>
                 <template>
-                    <el-table :data="tableData" style="width: 100%">
-                        <el-table-column label="分类名称">
+                    <el-table :data="classifyList" style="width: 100%">
+                        <el-table-column label="名称" prop="c_name">
+                        </el-table-column>
+                        <el-table-column label="父级分类">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.date }}</span>
+                                <span> {{ scope.row.classify }}</span>
                             </template>
                         </el-table-column>
                         <el-table-column label="操作">
                             <template slot-scope="scope">
-                                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                                <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                                <el-button size="mini" @click="handleEdit(scope.row.c_id, scope.row)">编辑</el-button>
+                                <el-button size="mini" type="danger" @click="handleDelete(scope.row.c_id, scope.row)">删除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -58,24 +61,48 @@
         el: "#app",
         data() {
             return {
-                tableData: [{
-                    date: '日用品'
-                }, {
-                    date: '零食'
-                }, {
-                    date: '玩具'
-                }, {
-                    date: '海鲜'
-                }]
+                classifyList: []
             }
         },
         methods: {
             handleEdit(index, row) {
-                console.log(index, row);
+                // console.log(index, row);
+                location.href = "./classify_edit.html?cid="+index;
             },
             handleDelete(index, row) {
-                console.log(index, row);
+                this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    center: true
+                }).then(() => {
+                    $.get("/classify/del?cid="+index, (result)=>{
+                        if (result.isOK) {
+                            this.getData();
+                        }else {
+                            this.$message.error('管理员删除失败！');
+                        }
+                    });
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            getData() {
+                $.get('/classify/list', (result)=>{
+                    // console.log(result);
+                    this.classifyList = result;
+                })
             }
+        },
+        mounted(){
+            this.getData();
         }
     });
 </script>

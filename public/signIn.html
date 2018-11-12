@@ -64,11 +64,11 @@
                             // 发送ajax查询账号是否存在
                             $.post("/users/login", this.ruleForm2, (result)=>{
                                 // console.log(result);
-                                if (result.length > 0) {
+                                if (result.isOK) {
                                     location.href = "./index.html";
                                 }else {
                                     this.$message.error('用户名或密码错误！');
-                                    $("#password").val("");
+                                    this.ruleForm2.password = "";
                                 }
                             });
 

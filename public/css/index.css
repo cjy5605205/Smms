@@ -138,3 +138,8 @@ body > .el-container {
 .el-submenu {
     margin-bottom: 20px;
 }
+
+
+#searchInput .el-input {
+    width: 100%;
+}

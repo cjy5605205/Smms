@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="./css/elementUI.css">
     <link rel="stylesheet" href="./css/member_add.css">
     <link rel="stylesheet" href="./css/index.css">
+    <!-- 如果不用script标签进行同步请求 而是使用异步 则用户会看到网页内容后再被阻止请求 -->
+    <script src="/users/checkState"></script>
 </head>
 <body>
 <div id="app">
@@ -22,18 +24,15 @@
                     <span>商品管理</span>
                 </div>
 
-                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                <el-form :inline="true" :model="search" class="demo-form-inline">
                     <el-form-item label="分类">
-                        <el-select v-model="formInline.productClassify" placeholder="--选择商品分类--">
-                            <el-option label="区域一" value="shanghai"></el-option>
-                            <el-option label="区域二" value="beijing"></el-option>
+                        <el-select v-model="goodsList.classify" placeholder="--选择商品分类--">
+                            <el-option v-for="(item, index) in goodsList" :label="item.classify" :value="item.classify"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="关键字">
-                        <el-input v-model="formInline.keywords" placeholder="请输入关键字"></el-input>
-                        (商品名称，条形码)
+                    <el-form-item id="searchInput" label="关键字">
+                        <el-input v-model="search.keywords" placeholder="商品名称，条形码"></el-input>
                     </el-form-item>
-
                     <el-form-item>
                         <el-button type="success" size="mini" @click="onSubmit">查询</el-button>
                     </el-form-item>
@@ -41,69 +40,55 @@
 
 
                 <template>
-                    <el-table :data="tableData" style="width: 100%">
+                    <el-table :data="goodsList" style="width: 100%">
                         <el-table-column label="商品条形码" width="150">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.date }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.barcode }}</span>
                             </template>
                         </el-table-column>
 
                         <el-table-column label="商品名称">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.name }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.goodsname }}</span>
                             </template>
                         </el-table-column>
 
                         <el-table-column label="所属分组">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.address }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.classify }}</span>
                             </template>
                         </el-table-column>
 
                         <el-table-column label="售价（元）">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.price }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.goodsprice }}</span>
                             </template>
                         </el-table-column>
 
                         <el-table-column label="促销价（元）">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.promotion }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.saleprice }}</span>
                             </template>
                         </el-table-column>
 
                         <el-table-column label="市场价（元）">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.marketPrice }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.marketprice }}</span>
                             </template>
                         </el-table-column>
 
                         <el-table-column label="库存">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.count }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.stockNum }}</span>
                             </template>
                         </el-table-column>
 
-                        <el-table-column label="库存总额（元）">
+                        <el-table-column label="商品简介">
                             <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.sumCount }}</span>
+                                <span style="margin-left: 10px">{{ scope.row.goodsDetails }}</span>
                             </template>
                         </el-table-column>
 
-                        <el-table-column label="销售总额（元）">
-                            <template slot-scope="scope">
-                                <i class="el-icon-time"></i>
-                                <span style="margin-left: 10px">{{ scope.row.sumPrice }}</span>
-                            </template>
-                        </el-table-column>
 
                         <el-table-column label="管理" width="150">
                             <template slot-scope="scope">
@@ -114,15 +99,16 @@
                     </el-table>
                 </template>
 
-                <div class="block mt30">
+                <div class="block">
                     <el-pagination
+                            background
                             @size-change="handleSizeChange"
                             @current-change="handleCurrentChange"
-                            :current-page="currentPage4"
-                            :page-sizes="[100, 200, 300, 400]"
-                            :page-size="100"
+                            :current-page="currentPage"
+                            :page-sizes="[5, 10, 15, 20]"
+                            :page-size="pageSize"
                             layout="total, sizes, prev, pager, next, jumper"
-                            :total="400">
+                            :total="total">
                     </el-pagination>
                 </div>
             </el-card>
@@ -146,57 +132,19 @@
         el: "#app",
         data() {
             return {
-                formInline: {
+                goodsList: [],
+                currentPage1: 1,
+                currentPage2: 2,
+                currentPage3: 3,
+                currentPage4: 4,
+                search: {
                     keywords: '',
-                    productClassify: ''
+                    classify: ''
                 },
-                tableData: [{
-                    date: '7896541258',
-                    name: '薯片',
-                    address: '可口可怜',
-                    price: '5.00',
-                    promotion: '未促销',
-                    marketPrice: '6.00',
-                    count: 100,
-                    sumCount: 9000.00,
-                    sumPrice: 8000.00
-                }, {
-                    date: '7896541258',
-                    name: '可口可乐',
-                    address: '可口可怜',
-                    price: '5.00',
-                    promotion: '未促销',
-                    marketPrice: '6.00',
-                    count: 100,
-                    sumCount: 9000.00,
-                    sumPrice: 8000.00
-                }, {
-                    date: '7896541258',
-                    name: '百事可怜',
-                    address: '可口可怜',
-                    price: '5.00',
-                    promotion: '未促销',
-                    marketPrice: '6.00',
-                    count: 100,
-                    sumCount: 9000.00,
-                    sumPrice: 8000.00
-                }, {
-                    date: '7896541258',
-                    name: '非常可怜',
-                    address: '可口可怜',
-                    price: '5.00',
-                    promotion: '未促销',
-                    marketPrice: '6.00',
-                    count: 100,
-                    sumCount: 9000.00,
-                    sumPrice: 8000.00
-                }],
-                currentPage1: 5,
-                currentPage2: 5,
-                currentPage3: 5,
-                currentPage4: 4
+                total: 10,        // 总数据条数
+                currentPage: 1,  // 当前页数
+                pageSize: 5     // 每页显示的条数
             }
-
         },
         methods: {
             handleEdit(index, row) {
@@ -206,14 +154,43 @@
                 console.log(index, row);
             },
             handleSizeChange(val) {
-                console.log(`每页 ${val} 条`);
+                // console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.getData();
             },
             handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
+                // console.log(`当前页: ${val}`);
+                this.currentPage = val;
+                this.getData();
             },
+            //  查询
             onSubmit() {
-                console.log('submit!');
+                this.getData();
+            },
+            // 查询+分页
+            getData(){
+                let obj = {
+                    currentPage: this.currentPage,   // 当前页
+                    pageSize: this.pageSize,          // 每页大小
+                    keywords: this.search.keywords,  // 关键字
+                    classify: this.search.classify   // 分类
+                };
+                // console.log(obj);
+
+                $.get('/goods/listPage', obj, (result)=>{
+                    // console.log(result);
+                    this.total = result.total; // 负荷条件的总纪录数
+                    this.goodsList = result.dataList;  // 符合条件的分页数据
+                })
             }
+        },
+        mounted(){
+            this.getData();
+            $.get('/goods/list', (result)=>{
+                console.log(result);
+                this.goodsList = result;
+            });
+
         }
     });
 </script>

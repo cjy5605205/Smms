@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="./css/elementUI.css">
     <link rel="stylesheet" href="./css/member_add.css">
     <link rel="stylesheet" href="./css/index.css">
+    <!-- 如果不用script标签进行同步请求 而是使用异步 则用户会看到网页内容后再被阻止请求 -->
+    <script src="/users/checkState"></script>
 </head>
 <body>
 <div id="app">
@@ -22,12 +24,9 @@
                     <span>添加管理员账号</span>
                 </div>
                 <el-form  :label-position="labelPosition" :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
-                    <el-form-item label="所属分类" prop="region">
-                        <el-select v-model="ruleForm2.region" placeholder="-----选择分类-----">
-                            <el-option label="零食" value="零食"></el-option>
-                            <el-option label="肉类" value="肉类"></el-option>
-                            <el-option label="海鲜" value="海鲜"></el-option>
-                            <el-option label="蔬菜" value="蔬菜"></el-option>
+                    <el-form-item label="所属分类" prop="classify">
+                        <el-select v-model="ruleForm2.classify" placeholder="请选择分类">
+                            <el-option v-for="(item, index) in ruleForm2.classifyList" :label="item.c_name" :value="item.c_name"></el-option>
                         </el-select>
                     </el-form-item>
 
@@ -39,17 +38,17 @@
                         <el-input v-model="ruleForm2.goodsName"></el-input>
                     </el-form-item>
 
-                    <el-form-item label="商品售价" prop="goodsPrice">
-                        <el-input v-model.number="ruleForm2.goodsPrice" ></el-input>元
+                    <el-form-item label="进价" prop="purchasePrice">
+                        <el-input v-model.number="ruleForm2.purchasePrice" @blur="getPrice()"></el-input>元
                     </el-form-item>
 
                     <el-form-item label="市场价" prop="marketPrice">
-                        <el-input v-model.number="marketPrice" :disabled="true"></el-input>元
+                        <el-input v-model.number="ruleForm2.marketPrice" :disabled="true"></el-input>元
                         <p class="cCCC">默认市场价为售价的1.2倍</p>
                     </el-form-item>
 
-                    <el-form-item label="进价" prop="purchasePrice">
-                        <el-input v-model.number="ruleForm2.purchasePrice"></el-input>元
+                    <el-form-item label="商品售价" prop="goodsPrice">
+                        <el-input v-model.number="ruleForm2.goodsPrice" :disabled="true"></el-input>元
                     </el-form-item>
 
                     <el-form-item label="入库数量" prop="count">
@@ -108,29 +107,15 @@
     new Vue({
         el: "#app",
         data() {
-            let checkNumber = (rule, value, callback) => {
-                    if (!Number.isInteger(value)) {
-                        callback(new Error('请输入数字值'));
-                        return false;
-                    } else {
-                        if (value < 0) {
-                            callback(new Error('请输入大于0的数'));
-                            return false;
-                        } else {
-                            callback();
-                            return false;
-                        }
-                    }
-                };
             return {
                 labelPosition: 'top',
                 ruleForm2: {
-                    region: "",
+                    classifyList: [],
                     barCode: "",
                     goodsName: "",
-                    goodsPrice: "",
-                    marketPrice: "",
-                    purchasePrice: "",
+                    goodsPrice: 0,
+                    marketPrice: 0,
+                    purchasePrice: 0,
                     count: "",
                     weight: "",
                     unit: "",
@@ -139,7 +124,7 @@
                     introduce: ""
                 },
                 rules2: {
-                    region: [
+                    classifyList: [
                         { required: true, message: "请选择用户组", trigger: "change"}
                     ],
                     barCode: [
@@ -148,20 +133,17 @@
                     goodsName: [
                         { required: true, message: "请输入商品名字", trigger: "blur"}
                     ],
-                    goodsPrice: [
-                        { validator: checkNumber, trigger: "change"}
-                    ],
                     purchasePrice: [
                         { required: true, message: "请输入进价", trigger: "blur"},
-                        { validator: checkNumber, trigger: "change"}
+                        { type: 'number',message: "进价必须是数字！", trigger: "blur"}
                     ],
                     count: [
                         { required: true, message: "请输入入库数量", trigger: "blur"},
-                        { validator: checkNumber, trigger: "change"}
+                        { type: 'number',message: "进价必须是数字！", trigger: "change"}
                     ],
                     weight: [
                         { required: true, message: "请输入商品重量", trigger: "blur"},
-                        { validator: checkNumber, trigger: "change"}
+                        { type: 'number',message: "进价必须是数字！", trigger: "change"}
                     ],
                     unit: [
                         { required: true, message: "请输入商品单位", trigger: "blur"}
@@ -172,16 +154,32 @@
                     isPromotion: [
                         { required: true, message: "请选择是否促销", trigger: "change"}
                     ]
-
                 }
             };
+        },
+        mounted(){
+            $.get('/classify/list', (result)=>{
+                // console.log(result);
+                this.ruleForm2.classifyList = result;
+            })
         },
         methods: {
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         console.log(this.ruleForm2);
-
+                        $.post('./goods/add', this.ruleForm2, (result)=>{
+                            // console.log(result);
+                            if (result.isOK){
+                                this.$message({
+                                    message: result.msg,
+                                    type: 'success'
+                                });
+                                location.href = "./goods_list.html";
+                            }else {
+                                this.$message.error('添加失败！');
+                            }
+                        })
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -191,16 +189,23 @@
             resetForm(formName) {
                 this.$refs[formName].resetFields();
             },
+            // 生成条形码
             getBarCode(){
-                this.ruleForm2.barCode = Math.floor(Math.random()*(99999 - 10000 + 1)*10000);
+                this.ruleForm2.barCode = new Date().getTime();
+            },
+            // 计算市场价和售价
+            getPrice() {
+                this.ruleForm2.purchasePrice = parseFloat((this.ruleForm2.purchasePrice*1).toFixed(2));
+                this.ruleForm2.marketPrice = (this.ruleForm2.purchasePrice * 2).toFixed(2);
+                this.ruleForm2.goodsPrice = (this.ruleForm2.purchasePrice * 0.8).toFixed(2);
             }
-        },
-        computed: {
+        }
+        /*computed: {
             marketPrice() {
                 this.ruleForm2.marketPrice = this.ruleForm2.goodsPrice * 1.2;
                 return (this.ruleForm2.goodsPrice * 1.2).toFixed(2);
             }
-        }
+        }*/
     });
 </script>
 </body>
